@@ -1,5 +1,5 @@
 const CACHE_NAME = 'void-shell-v1';
-const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './void-icon.svg'];
+const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './void-icon.svg', './void-logo.svg', './supabase-config.js'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
