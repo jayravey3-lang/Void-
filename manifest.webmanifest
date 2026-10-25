@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "VOID — Your Digital Universe",
+  "short_name": "VOID",
+  "description": "Discover ideas, save what matters, and bring your digital world into one focused space.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080b16",
+  "theme_color": "#080b16",
+  "categories": ["productivity", "education", "utilities"],
+  "icons": [
+    {
+      "src": "./void-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
