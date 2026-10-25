@@ -20,3 +20,10 @@ The UI still runs in local-demo mode until backend configuration is supplied and
 
 ## Deploy
 GitHub Pages can host the static frontend, but Supabase Edge Functions need to be deployed separately. Enable Pages for this repository and confirm the published base path before testing the manifest and service worker.
+
+## Frontend auth wiring
+- Fill in `supabase-config.js` with the project's Supabase URL and anon/public key.
+- Auth UI supports email/password sign-in and sign-up. Email confirmation depends on your Supabase Auth settings.
+- The profile editor and feedback form can write to the Supabase tables after the schema is applied.
+- Keep the Supabase service-role key and Resend key only in Edge Function secrets.
+- The prototype's saved-library and demo-conversation UI are still local-first; cloud bookmark sync and recipient discovery are not yet wired into the UI.
