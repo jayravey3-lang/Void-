@@ -34,20 +34,9 @@ create policy "Users manage own blocks" on public.user_blocks
   using (auth.uid() = blocker_id)
   with check (auth.uid() = blocker_id);
 
--- Tighten message sending so a user cannot send to themselves or someone
--- who has blocked them, and users cannot message someone they have blocked.
-drop policy if exists "Sender creates own messages" on public.messages;
-create policy "Sender creates own messages" on public.messages
-  for insert to authenticated
-  with check (
-    auth.uid() = sender_id
-    and sender_id <> recipient_id
-    and not exists (
-      select 1 from public.user_blocks b
-      where (b.blocker_id = recipient_id and b.blocked_id = sender_id)
-         or (b.blocker_id = sender_id and b.blocked_id = recipient_id)
-    )
-  );
+-- Messaging must remain disabled in production until a trusted server-side
+-- send-message operation enforces blocks for both participants. Do not rely
+-- on a client-side check for this rule.
 
 create table if not exists public.user_reports (
   id uuid primary key default gen_random_uuid(),
