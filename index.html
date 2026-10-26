@@ -58,6 +58,54 @@ input::placeholder,textarea::placeholder{color:#7483a1}
 .theme-light .card:hover{box-shadow:0 14px 30px #263e7618}
 @media(max-width:620px){html{scroll-padding-top:125px}.main{animation-duration:.38s}aside{backdrop-filter:blur(18px);background:#090d19ed}.nav button:hover{transform:translateY(-1px)}.hero:before{width:210px;height:210px;right:-95px;top:-110px}.card:hover{transform:translateY(-2px)}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}.main{animation:none}.card:hover,.btn:hover,.nav button:hover,.chip:hover{transform:none}}
+
+/* VOID motion system: polished micro-interactions, depth, and accessible motion. */
+:root{scroll-behavior:smooth}
+body{overflow-x:hidden;background-image:radial-gradient(ellipse at 78% -12%,#26366b88,transparent 43%),radial-gradient(ellipse at 4% 42%,#102b4b44,transparent 35%),linear-gradient(160deg,#080b16,#090d19 65%,#0b1020);background-attachment:fixed}
+.app{animation:voidPageIn .65s cubic-bezier(.2,.7,.2,1) both}
+aside{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transition:border-color .25s ease}
+.brand-logo,.logo{transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .35s ease}
+.brand:hover .brand-logo{transform:rotate(-7deg) scale(1.06);filter:drop-shadow(0 0 12px #69e5ff55)}
+.nav button{position:relative;overflow:hidden;transition:color .22s ease,background .22s ease,border-color .22s ease,transform .22s ease}
+.nav button:hover{transform:translateX(3px)}
+.nav button.active{box-shadow:inset 3px 0 0 var(--cyan),0 5px 18px #00000016}
+.nav button:after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent,#69e5ff12,transparent);transform:translateX(-110%);transition:transform .5s ease;pointer-events:none}
+.nav button:hover:after{transform:translateX(110%)}
+.hero{position:relative;isolation:isolate;overflow:hidden;box-shadow:0 18px 55px #00000020;transition:border-color .3s ease,box-shadow .3s ease}
+.hero:before{content:"";position:absolute;z-index:-1;width:290px;height:290px;right:-95px;top:-145px;border-radius:50%;background:radial-gradient(circle,#69e5ff24,transparent 68%);animation:voidGlow 8s ease-in-out infinite alternate;pointer-events:none}
+.hero:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(110deg,transparent 25%,#ffffff04 48%,transparent 70%);transform:translateX(-100%);animation:voidShimmer 9s ease-in-out infinite;pointer-events:none}
+.btn,.chip{position:relative;overflow:hidden;transition:transform .2s ease,box-shadow .25s ease,border-color .25s ease,background-color .25s ease}
+.btn:hover{transform:translateY(-2px);border-color:#5c8ebd;box-shadow:0 7px 22px #00000024}
+.btn:active,.chip:active{transform:translateY(0) scale(.98)}
+.btn.primary{box-shadow:0 5px 20px #6c9fff20}
+.btn.primary:hover{box-shadow:0 8px 28px #69e5ff35}
+.card,.stat,.form,.item{transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease,background-color .25s ease}
+.card{position:relative;overflow:hidden}
+.card:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,#69e5ff80,#b37cff80,transparent);opacity:0;transition:opacity .25s ease}
+.card:hover{transform:translateY(-4px);border-color:#435985;box-shadow:0 16px 34px #00000028}
+.card:hover:before{opacity:1}
+.card-art{position:relative;overflow:hidden;transition:transform .35s ease,filter .35s ease}
+.card:hover .card-art{filter:saturate(1.2);transform:scale(1.015)}
+.card-art:after{content:"";position:absolute;inset:-40%;background:linear-gradient(110deg,transparent 42%,#ffffff12 50%,transparent 58%);transform:translateX(-65%);transition:transform .65s ease}
+.card:hover .card-art:after{transform:translateX(65%)}
+.stat:hover{transform:translateY(-2px);border-color:#3a527d}
+.top input,.field input,.field textarea,.field select,#librarySearch{transition:border-color .2s ease,box-shadow .2s ease,background .2s ease}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.top input:focus,.field input:focus,.field textarea:focus,.field select:focus,#librarySearch:focus{border-color:#69bfe7;box-shadow:0 0 0 3px #69e5ff18;outline:none}
+.view.active{animation:voidViewIn .38s cubic-bezier(.2,.7,.2,1) both}
+.view.active .section{animation:voidViewIn .45s both}
+.view.active .grid>.card{animation:voidViewIn .45s both}
+.view.active .grid>.card:nth-child(2){animation-delay:.045s}
+.view.active .grid>.card:nth-child(3){animation-delay:.09s}
+.empty{animation:voidViewIn .3s ease both}
+.loading-logo{filter:drop-shadow(0 0 24px #167aff88) drop-shadow(0 0 50px #8a62ff22)}
+.footer{gap:10px}
+@keyframes voidPageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes voidViewIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes voidGlow{from{transform:translate3d(-10px,0,0) scale(.92);opacity:.55}to{transform:translate3d(12px,18px,0) scale(1.12);opacity:1}}
+@keyframes voidShimmer{0%,65%,100%{transform:translateX(-100%)}78%{transform:translateX(100%)}}
+@media(max-width:620px){.nav button:hover{transform:none}.card:hover{transform:translateY(-2px)}.hero:before{right:-180px}.main{padding-bottom:28px}}
+@media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 </style></head><body><div class="loading-screen" id="loadingScreen" role="status" aria-label="Loading VOID"><div class="loading-inner"><img class="loading-logo" src="./void-logo.svg" alt="VOID logo"><div class="loading-word">VOID</div><div class="loading-caption">Entering your digital universe</div><div class="loading-track"></div></div></div><div class="app"><aside><div class="brand"><img class="brand-logo" src="./void-logo.svg" alt="VOID logo"> VOID</div><nav class="nav"><div class="nav-label">YOUR WORKSPACE</div><button class="active" data-page="home">⌂ &nbsp; Home</button><button data-page="explore">⌕ &nbsp; Explore</button><button data-page="library">▣ &nbsp; Library <span id="savedCount"></span></button><button data-page="connect">◌ &nbsp; Connect</button><button data-page="profile">◎ &nbsp; My VOID</button><button data-page="settings">⚙ &nbsp; Settings</button><button data-page="feedback">✧ &nbsp; Feedback</button></nav><div class="status">● Local demo active<br><span class="muted">Browser-only storage · Services not connected</span></div></aside><main class="main"><header class="top"><div><div class="eyebrow" id="eyebrow">YOUR SPACE · YOUR RULES</div><h1 class="title" id="title">Welcome to VOID</h1></div><input id="globalSearch" placeholder="Search discoveries…" aria-label="Search discoveries"></header>
 <section class="view active" id="page-home"><div class="hero"><div class="eyebrow">A NEW DIGITAL FRONTIER</div><h2>Your digital universe.<br><span class="gradient">Built around you.</span></h2><p>Discover ideas, save what matters, and bring your digital world into one focused space.</p><div class="row"><button class="btn primary" data-goto="explore">Explore VOID ↗</button><button class="btn" data-goto="library">Open your library</button></div></div><div class="stats"><div class="stat"><span class="muted">Saved items</span><strong id="statSaved">0</strong></div><div class="stat"><span class="muted">Discoveries</span><strong>06</strong></div><div class="stat"><span class="muted">Demo connections</span><strong>03</strong></div></div><div class="section"><h3>Launchpad</h3></div><div class="grid"><article class="card"><div class="card-art">⌕</div><h4>Explore ideas</h4><p>Browse curated sample discoveries.</p><button class="btn" data-goto="explore">Explore →</button></article><article class="card"><div class="card-art">▣</div><h4>Your library</h4><p>Keep useful discoveries close at hand.</p><button class="btn" data-goto="library">View library →</button></article><article class="card"><div class="card-art">✧</div><h4>Shape VOID</h4><p>Share an idea to improve the experience.</p><button class="btn" data-goto="feedback">Give feedback →</button></article></div></section>
 <section class="view" id="page-explore"><div class="hero"><div class="eyebrow">THE DISCOVERY ENGINE</div><h2>Find your next <span class="gradient">something.</span></h2><p>Search this prototype's sample collection. Live search is not connected yet.</p><div class="field"><input id="search" placeholder="Try design, code, or space…" aria-label="Search collection"></div></div><div class="chips"><button class="chip active" data-cat="All">All</button><button class="chip" data-cat="Design">Design</button><button class="chip" data-cat="Technology">Technology</button><button class="chip" data-cat="Learning">Learning</button></div><div class="grid" id="exploreGrid"></div></section>
@@ -125,7 +173,7 @@ renderLibrary=function(){
 const voidOriginalRenderExplore=renderExplore;
 renderExplore=function(){
  const q=(($('#search')||{}).value||$('#globalSearch').value||'').toLowerCase().trim();
- const found=items.filter(x=>(cat==='All'||x.cat===cat)&&(!q||(x.title+' '+x.desc+' '+(x.tags||'')+' '+x.cat+' '+(x.url||'')).toLowerCase().includes(q));
+ const found=items.filter(x=>(cat==='All'||x.cat===cat)&&(!q||(x.title+' '+x.desc+' '+(x.tags||'')+' '+x.cat+' '+(x.url||'')).toLowerCase().includes(q)));
  $('#exploreGrid').innerHTML=found.length?found.map(card).join(''):'<div class="empty">No discoveries match that search.</div>';bindSave();
 };
 $('#bookmarkForm').addEventListener('submit',event=>{
