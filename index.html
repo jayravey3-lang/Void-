@@ -116,7 +116,7 @@ input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-vis
 <section class="view" id="page-connect"><div class="section"><div><h3>Connect</h3><span class="muted">Demo conversations; nothing is sent externally.</span></div></div><div class="list" id="messages"></div><div class="form"><h3>Local demo message</h3><form id="messageForm"><div class="field"><label for="to">Conversation</label><select id="to"><option>Nova — Product ideas</option><option>Atlas — Learning corner</option><option>Echo — Design lab</option></select></div><div class="field"><label for="message">Message</label><textarea id="message" required maxlength="500" placeholder="Write a demo message…"></textarea></div><button class="btn primary">Save demo message</button></form></div></section>
 <section class="view" id="page-profile"><div class="form"><img class="profile-logo" src="./void-logo.svg" alt="VOID logo"><h3>Account & profile</h3>
 <div class="item"><strong id="authState">Backend not configured</strong><p id="authHelp">Connect a Supabase project in supabase-config.js to enable real accounts and cloud sync.</p>
-<form id="authForm"><div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></div><div class="field"><label for="authPassword">Password</label><input id="authPassword" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"></div><div class="row"><button class="btn primary" type="submit" id="signInBtn">Sign in</button><button class="btn" type="button" id="signUpBtn">Create account</button><button class="btn" type="button" id="signOutBtn" hidden>Sign out</button></div></form><p class="muted" id="authStatus" aria-live="polite"></p></div><form id="profileForm"><div class="field"><label for="name">Display name</label><input id="name" maxlength="50" placeholder="Your name"></div><div class="field"><label for="bio">Short bio</label><textarea id="bio" maxlength="240" placeholder="What are you curious about?"></textarea></div><button class="btn primary">Save profile</button></form><p class="muted" id="profileStatus"></p></div></section>
+<form id="authForm"><div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></div><div class="field"><label for="authPassword">Password</label><input id="authPassword" type="password" autocomplete="current-password" minlength="8" required placeholder="At least 8 characters"></div><div class="row"><button class="btn primary" type="submit" id="signInBtn">Sign in</button><button class="btn" type="button" id="signUpBtn">Create account</button><button class="btn" type="button" id="resetPasswordBtn">Forgot password?</button><button class="btn" type="button" id="signOutBtn" hidden>Sign out</button></div></form><p class="muted" id="authStatus" aria-live="polite"></p><form id="recoveryForm" hidden><div class="field"><label for="recoveryPassword">New password</label><input id="recoveryPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"></div><button class="btn primary" type="submit">Update password</button></form></div><form id="profileForm"><div class="field"><label for="name">Display name</label><input id="name" maxlength="50" placeholder="Your name"></div><div class="field"><label for="bio">Short bio</label><textarea id="bio" maxlength="240" placeholder="What are you curious about?"></textarea></div><button class="btn primary">Save profile</button></form><p class="muted" id="profileStatus"></p></div></section>
 <section class="view" id="page-settings"><div class="form"><h3>Settings</h3><p class="muted">Manage prototype data.</p><div class="item"><strong>Personalized greeting</strong><p>Use your display name on the home screen.</p><input type="checkbox" id="greeting" checked aria-label="Personalized greeting"></div><div class="item"><strong>Appearance</strong><p>Choose the look of your digital universe.</p><select id="themeSelect" aria-label="Choose appearance"><option value="dark">Dark universe</option><option value="light">Light mode</option></select></div><div class="item"><strong>Clear local data</strong><p>Remove bookmarks, profile, demo messages and feedback from this browser.</p><button class="btn" id="clear">Clear data</button></div><p class="muted" id="settingsStatus"></p></div></section>
 <section class="view" id="page-feedback"><div class="hero"><div class="eyebrow">HELP SHAPE WHAT COMES NEXT</div><h2>Make VOID <span class="gradient">better.</span></h2><p>Tell us what works or what you would like to see next.</p></div><div class="form"><form id="feedbackForm"><div class="field"><label for="category">Category</label><select id="category"><option>Suggestion</option><option>Bug report</option><option>Question</option><option>Other</option></select></div><div class="field"><label for="subject">Subject</label><input id="subject" required maxlength="120" placeholder="A short summary"></div><div class="field"><label for="details">Details</label><textarea id="details" required maxlength="3000" placeholder="Share the details…"></textarea></div><button class="btn primary">Save feedback locally</button></form><p class="muted" id="feedbackStatus" aria-live="polite"></p><div class="notice">Prototype only: feedback stays in this browser. Email notifications to voidsearch0@gmail.com and the private feedback dashboard are not connected yet. Avoid entering sensitive information.</div></div></section><footer class="footer"><span>© VOID · Your digital universe</span><span>Prototype build · Services not connected</span></footer></main></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -129,25 +129,114 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
 </script>
 <script src="./supabase-config.js"></script><script>
 (async()=>{
- const state=$('#authState'),help=$('#authHelp'),status=$('#authStatus'),signout=$('#signOutBtn'),signin=$('#signInBtn'),signup=$('#signUpBtn');
+ const $=selector=>document.querySelector(selector);
+ const state=$('#authState'),help=$('#authHelp'),status=$('#authStatus');
+ const signout=$('#signOutBtn'),signin=$('#signInBtn'),signup=$('#signUpBtn'),reset=$('#resetPasswordBtn'),form=$('#authForm');
+ const email=$('#authEmail'),password=$('#authPassword');
  const cfg=window.VOID_SUPABASE_CONFIG||{};
- if(!window.supabase||!cfg.url||!cfg.anonKey||cfg.url.includes('YOUR_PROJECT')||cfg.anonKey.includes('YOUR_ANON')){
-  state.textContent='Backend not configured';help.textContent='Add your Supabase project URL and public anon key to supabase-config.js. The demo continues to work locally.';return;
+ const configured=!!(window.supabase&&cfg.url&&cfg.anonKey&&!cfg.url.includes('YOUR_PROJECT')&&!cfg.anonKey.includes('YOUR_ANON'));
+ function busy(value){[signin,signup,reset,signout].forEach(button=>{if(button)button.disabled=value;});}
+ function message(text,isError=false){status.textContent=text;status.style.color=isError?'#ffb4b4':'';}
+ if(!configured){
+  state.textContent='Backend not configured';
+  help.textContent='Add your Supabase project URL and public anon key to supabase-config.js, then deploy the updated site.';
+  signin.disabled=true;signup.disabled=true;reset.disabled=true;signout.hidden=true;
+  form.onsubmit=e=>{e.preventDefault();message('Sign-in is unavailable until Supabase is configured.',true);};
+  signup.onclick=()=>message('Account creation is unavailable until Supabase is configured.',true);
+  reset.onclick=()=>message('Password recovery is unavailable until Supabase is configured.',true);
+  return;
  }
- const client=window.supabase.createClient(cfg.url,cfg.anonKey);window.voidSupabase=client;
+ const client=window.supabase.createClient(cfg.url,cfg.anonKey);
+ window.voidSupabase=client;
+ state.textContent='Connecting to VOID accounts…';
+ help.textContent='Checking your secure sign-in session.';
  async function sessionUpdate(session){
-  const user=session?.user;state.textContent=user?'Signed in · '+user.email:'Not signed in';help.textContent=user?'Your account is connected. Cloud features require the schema in supabase/schema.sql.':'Sign in or create an account to use your VOID identity.';signin.hidden=!!user;signup.hidden=!!user;signout.hidden=!user;
-  if(user){const {data}=await client.from('profiles').select('display_name,bio').eq('id',user.id).maybeSingle();if(data){profile={name:data.display_name||'',bio:data.bio||''};persist();update();}}
+  const user=session?.user;
+  state.textContent=user?'Signed in · '+user.email:'Not signed in';
+  help.textContent=user?'Your account is connected. Save your profile to sync it to your account.':'Sign in or create an account to use your VOID identity.';
+  signin.hidden=!!user;signup.hidden=!!user;reset.hidden=!!user;signout.hidden=!user;
+  if(user){
+   const {data,error}=await client.from('profiles').select('display_name,bio').eq('id',user.id).maybeSingle();
+   if(error){console.warn('VOID profile read failed:',error.message);return;}
+   if(data){profile={name:data.display_name||'',bio:data.bio||''};persist();update();}
+  }
  }
- client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>sessionUpdate(session),0)});
- const {data:{session}}=await client.auth.getSession();await sessionUpdate(session);
- $('#authForm').onsubmit=async e=>{e.preventDefault();status.textContent='Signing in…';const {error}=await client.auth.signInWithPassword({email:$('#authEmail').value.trim(),password:$('#authPassword').value});status.textContent=error?error.message:'Signed in.';};
- signup.onclick=async()=>{status.textContent='Creating account…';const {data,error}=await client.auth.signUp({email:$('#authEmail').value.trim(),password:$('#authPassword').value});status.textContent=error?error.message:(data.session?'Account created and signed in.':'Check your email to confirm your account.');};
- signout.onclick=async()=>{const {error}=await client.auth.signOut();status.textContent=error?error.message:'Signed out.';};
- const originalSave=$('#profileForm').onsubmit;
- $('#profileForm').onsubmit=async e=>{if(!window.voidSupabase)return; e.preventDefault();profile={name:$('#name').value.trim(),bio:$('#bio').value.trim()};persist();const {data:{user}}=await client.auth.getUser();if(!user){$('#profileStatus').textContent='Saved locally. Sign in to sync your profile.';return;}const {error}=await client.from('profiles').upsert({id:user.id,display_name:profile.name,bio:profile.bio,updated_at:new Date().toISOString()});$('#profileStatus').textContent=error?'Saved locally; cloud sync failed: '+error.message:'Profile saved to your account.';};
+ client.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){const recovery=$('#recoveryForm');recovery.hidden=false;signin.hidden=true;signup.hidden=true;reset.hidden=true;signout.hidden=true;help.textContent='Choose a new password for your VOID account.';message('Password recovery link verified. Set a new password below.');}setTimeout(()=>sessionUpdate(session).catch(error=>console.warn('VOID session update failed:',error)),0);});
+ $('#recoveryForm').onsubmit=async e=>{e.preventDefault();const next=$('#recoveryPassword');if(!next.reportValidity())return;busy(true);message('Updating password…');try{const {error}=await client.auth.updateUser({password:next.value});if(error)throw error;e.currentTarget.reset();e.currentTarget.hidden=true;message('Password updated successfully. You can now sign in with your new password.');await client.auth.signOut();}catch(error){message(error.message||'Password update failed.',true);}finally{busy(false);}};
+ try{
+  const {data:{session},error}=await client.auth.getSession();
+  if(error)throw error;
+  await sessionUpdate(session);
+ }catch(error){
+  state.textContent='Could not connect to accounts';
+  help.textContent='Check your connection and Supabase project settings, then reload.';
+  message(error.message||'Unable to check sign-in session.',true);
+ }
+ form.onsubmit=async e=>{
+  e.preventDefault();
+  if(!form.reportValidity())return;
+  busy(true);message('Signing in…');
+  try{
+   const {error}=await client.auth.signInWithPassword({email:email.value.trim(),password:password.value});
+   if(error)throw error;
+   message('Signed in successfully.');
+  }catch(error){message(error.message||'Sign-in failed. Check your email and password.',true);}
+  finally{busy(false);}
+ };
+ signup.onclick=async()=>{
+  if(!email.value.trim()||!password.value||!email.checkValidity()||password.value.length<8){
+   if(!email.value.trim()||!email.checkValidity())email.reportValidity();
+   else {password.setCustomValidity('Use at least 8 characters.');password.reportValidity();password.setCustomValidity('');}
+   message('Enter a valid email and a password of at least 8 characters.',true);return;
+  }
+  busy(true);message('Creating your account…');
+  try{
+   const {data,error}=await client.auth.signUp({email:email.value.trim(),password:password.value});
+   if(error)throw error;
+   message(data.session?'Account created and signed in.':'Account created. Check your email for a confirmation link.');
+  }catch(error){message(error.message||'Account creation failed.',true);}
+  finally{busy(false);}
+ };
+ reset.onclick=async()=>{
+  if(!email.value.trim()||!email.checkValidity()){email.reportValidity();message('Enter your account email first.',true);return;}
+  busy(true);message('Requesting password recovery…');
+  try{
+   const redirectTo=location.origin+location.pathname;
+   const {error}=await client.auth.resetPasswordForEmail(email.value.trim(),{redirectTo});
+   if(error)throw error;
+   message('If an account exists for that email, a password recovery link will arrive shortly.');
+  }catch(error){message(error.message||'Could not request password recovery.',true);}
+  finally{busy(false);}
+ };
+ signout.onclick=async()=>{
+  busy(true);message('Signing out…');
+  try{const {error}=await client.auth.signOut();if(error)throw error;message('Signed out.');}
+  catch(error){message(error.message||'Sign-out failed.',true);}
+  finally{busy(false);}
+ };
+ $('#profileForm').onsubmit=async e=>{
+  e.preventDefault();profile={name:$('#name').value.trim(),bio:$('#bio').value.trim()};persist();
+  try{
+   const {data:{user},error:userError}=await client.auth.getUser();
+   if(userError)throw userError;
+   if(!user){$('#profileStatus').textContent='Saved locally. Sign in to sync your profile.';return;}
+   const {error}=await client.from('profiles').upsert({id:user.id,display_name:profile.name,bio:profile.bio,updated_at:new Date().toISOString()});
+   $('#profileStatus').textContent=error?'Saved locally; cloud sync failed: '+error.message:'Profile saved to your account.';
+  }catch(error){$('#profileStatus').textContent='Saved locally; account check failed: '+(error.message||'please try again.');}
+ };
  const originalFeedback=$('#feedbackForm').onsubmit;
- $('#feedbackForm').onsubmit=async e=>{if(!window.voidSupabase)return; e.preventDefault();const {data:{user}}=await client.auth.getUser();if(!user){originalFeedback.call(e.currentTarget,e);$('#feedbackStatus').textContent='Saved locally only. Sign in to submit feedback to the private dashboard.';return;}const payload={user_id:user.id,category:$('#category').value,subject:$('#subject').value.trim(),details:$('#details').value.trim()};const {error}=await client.from('feedback').insert(payload);if(error){$('#feedbackStatus').textContent='Feedback was not submitted: '+error.message;return;}e.currentTarget.reset();$('#feedbackStatus').textContent='Feedback submitted to the protected database. Email alerts require the separately deployed notification function.';};
+ $('#feedbackForm').onsubmit=async e=>{
+  e.preventDefault();
+  try{
+   const {data:{user},error:userError}=await client.auth.getUser();
+   if(userError)throw userError;
+   if(!user){originalFeedback.call(e.currentTarget,e);$('#feedbackStatus').textContent='Saved locally only. Sign in to submit feedback to the protected database.';return;}
+   const payload={user_id:user.id,category:$('#category').value,subject:$('#subject').value.trim(),details:$('#details').value.trim()};
+   const {error}=await client.from('feedback').insert(payload);
+   if(error)throw error;
+   e.currentTarget.reset();$('#feedbackStatus').textContent='Feedback submitted to the protected database.';
+  }catch(error){$('#feedbackStatus').textContent='Feedback was not submitted: '+(error.message||'please try again.');}
+ };
 })();
 </script><script>
 /* VOID product upgrades: custom bookmarks, library filtering, appearance and data export. */

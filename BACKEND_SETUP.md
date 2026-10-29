@@ -9,11 +9,13 @@
 - `supabase/functions/feedback-notify/index.ts`: optional feedback email notification scaffold.
 
 ## Connect a real backend
-1. Create a Supabase project at https://supabase.com/ and keep its URL and anon key.
+1. Create a Supabase project at https://supabase.com/ and keep its **Project URL** and **publishable/anon public key**.
 2. In Supabase SQL Editor, run `supabase/schema.sql`.
-3. In Supabase project settings, configure URL/key for the frontend. Do not commit service-role keys.
-4. Deploy Edge Functions with the Supabase CLI. Set any third-party search/email API keys as Edge Function secrets, never in browser JavaScript.
-5. Configure the frontend to call the deployed functions and test sign-in, RLS, search, messaging, and feedback with separate test accounts.
+3. In Supabase Authentication → URL Configuration, set the Site URL to your deployed VOID URL (for GitHub Pages: `https://jayravey3-lang.github.io/Void-/`) and add that same URL to Redirect URLs. Password recovery redirects back to the current page, where the new-password form appears.
+4. In Supabase Authentication → Providers, ensure Email is enabled. Choose whether email confirmation is required, and configure SMTP for reliable production delivery.
+5. Put only the Project URL and public publishable/anon key in `supabase-config.js`. Do not commit service-role keys or provider secrets.
+6. Deploy Edge Functions with the Supabase CLI. Set any third-party search/email API keys as Edge Function secrets, never in browser JavaScript.
+7. Commit and deploy the configured frontend, then test sign-up, email confirmation, sign-in, password recovery, sign-out, profile RLS, and feedback with separate test accounts.
 
 ## Current status
 The UI still runs in local-demo mode until backend configuration is supplied and integration is enabled. No real accounts, cloud syncing, search provider, messaging transport, email delivery, or production deployment is active just from these files. Do not use localStorage as an authentication or security boundary.
